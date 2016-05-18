@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -59,12 +60,15 @@ public class CloudbreakCleanupAction {
     @Inject
     private UsageService usageService;
 
+    @Inject
+    private Flow2Handler flow2Handler;
+
     public void resetStates() {
+        restartDistruptedFlows();
+        usageService.fixUsages();
+        setDeleteFailedStatus();
         List<Stack> stacksToSync = resetStackStatus();
         List<Cluster> clustersToSync = resetClusterStatus(stacksToSync);
-        setDeleteFailedStatus();
-        terminateRunningFlows();
-        usageService.fixUsages();
         triggerSyncs(stacksToSync, clustersToSync);
     }
 
@@ -118,12 +122,12 @@ public class CloudbreakCleanupAction {
         }
     }
 
-    private void terminateRunningFlows() {
+    private void restartDistruptedFlows() {
         List<Object[]> runningFlows = flowLogRepository.findAllNonFinalized();
-        String logMessage = "Terminating flow {}";
+        String logMessage = "Restarting flow {}";
         for (Object[] flow : runningFlows) {
             LOGGER.info(logMessage, flow[0]);
-            flowLogService.terminate((Long) flow[1], (String) flow[0]);
+            flow2Handler.restartFlow((String) flow[0]);
         }
     }
 

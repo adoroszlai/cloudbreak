@@ -74,13 +74,15 @@ public class StackToCloudStackConverter {
         List<Group> groups = new ArrayList<>();
         long privateId = getFirstValidPrivateId(instanceGroups);
         for (InstanceGroup instanceGroup : instanceGroups) {
+            CloudInstance skeleton = null;
             List<CloudInstance> instances = new ArrayList<>();
             Template template = instanceGroup.getTemplate();
             int desiredNodeCount = instanceGroup.getNodeCount();
             // existing instances
             for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                 InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
+                instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(),
+                        status));
             }
             // new instances
             int existingNodesSize = instances.size();
@@ -89,7 +91,10 @@ public class StackToCloudStackConverter {
                     instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, InstanceStatus.CREATE_REQUESTED));
                 }
             }
-            groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup)));
+            if (existingNodesSize == desiredNodeCount && desiredNodeCount == 0) {
+                skeleton = buildInstance(null, template, instanceGroup.getGroupName(), 0L, InstanceStatus.CREATE_REQUESTED);
+            }
+            groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup), skeleton));
         }
         return groups;
     }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.events;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+
 public class CloudbreakEventData {
     private Long entityId;
 
@@ -7,10 +9,20 @@ public class CloudbreakEventData {
 
     private String eventMessage;
 
-    public CloudbreakEventData(Long entityId, String eventType, String eventMessage) {
+    private String statusType;
+
+    private DetailedStackStatus detailedStatus;
+
+    public CloudbreakEventData(Long entityId, String eventType, String eventMessage, String statusType, DetailedStackStatus detailedStatus) {
         this.entityId = entityId;
         this.eventType = eventType;
         this.eventMessage = eventMessage;
+        this.statusType = statusType;
+        this.detailedStatus = detailedStatus;
+    }
+
+    public CloudbreakEventData(Long entityId, String eventType, String eventMessage) {
+        this(entityId, eventType, eventMessage, null, null);
     }
 
     public Long getEntityId() {
@@ -35,6 +47,22 @@ public class CloudbreakEventData {
 
     public void setEventMessage(String eventMessage) {
         this.eventMessage = eventMessage;
+    }
+
+    public String getStatusType() {
+        return statusType;
+    }
+
+    public void setStatusType(String statusType) {
+        this.statusType = statusType;
+    }
+
+    public DetailedStackStatus getDetailedStatus() {
+        return detailedStatus;
+    }
+
+    public void setDetailedStatus(DetailedStackStatus detailedStatus) {
+        this.detailedStatus = detailedStatus;
     }
 
     @Override

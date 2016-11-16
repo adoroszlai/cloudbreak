@@ -67,6 +67,12 @@ public class CloudbreakEventsJson implements JsonEntity {
     @ApiModelProperty(StackModelDescription.CLUSTER_STATUS)
     private Status clusterStatus;
 
+    @ApiModelProperty(StackModelDescription.STATUS_TYPE)
+    private String statusType;
+
+    @ApiModelProperty(StackModelDescription.DETAILED_STACK_STATUS)
+    private DetailedStackStatus detailedStackStatus;
+
     public Integer getNodeCount() {
         return nodeCount;
     }
@@ -209,5 +215,21 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    public DetailedStackStatus getDetailedStackStatus() {
+        return detailedStackStatus;
+    }
+
+    public void setDetailedStackStatus(DetailedStackStatus detailedStackStatus) {
+        this.detailedStackStatus = detailedStackStatus;
+    }
+
+    public String getStatusType() {
+        return statusType;
+    }
+
+    public void setStatusType(String statusType) {
+        this.statusType = statusType;
     }
 }

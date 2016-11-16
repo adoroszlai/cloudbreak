@@ -255,6 +255,10 @@ public class Stack implements ProvisionEntity {
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Cluster cluster;
 
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
+//    @Column(name = "stackstatus_id", columnDefinition = "int8")
+    private StackStatus stackStatus;
+
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Resource> resources = new HashSet<>();
 
@@ -692,4 +696,11 @@ public class Stack implements ProvisionEntity {
         return instanceGroups != null && !instanceGroups.isEmpty();
     }
 
+    public StackStatus getStackStatus() {
+        return stackStatus;
+    }
+
+    public void setStackStatus(StackStatus stackStatus) {
+        this.stackStatus = stackStatus;
+    }
 }

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
@@ -25,5 +26,11 @@ public class FlowMessageService {
         LOGGER.debug("{} [STACK_FLOW_STEP].", msgCode);
         String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
         cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
+    }
+
+    public void fireStackEventAndLog(Long stackId, Msg msgCode, String eventType, String statusType, DetailedStackStatus status, Object... args) {
+        LOGGER.debug("{} [STACK_FLOW_STEP].", msgCode);
+        String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
+        cloudbreakEventService.fireCloudbreakStackEvent(stackId, eventType, message, status);
     }
 }

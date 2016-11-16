@@ -14,6 +14,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 
 @Entity
@@ -82,6 +83,11 @@ public class CloudbreakEvent implements ProvisionEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status stackStatus;
+
+    private String statusType;
+
+    @Enumerated(EnumType.STRING)
+    private DetailedStackStatus detailedStackStatus;
 
     @Column(nullable = false)
     private Integer nodeCount;
@@ -241,6 +247,22 @@ public class CloudbreakEvent implements ProvisionEntity {
         this.clusterName = clusterName;
     }
 
+    public DetailedStackStatus getDetailedStackStatus() {
+        return detailedStackStatus;
+    }
+
+    public void setDetailedStackStatus(DetailedStackStatus detailedStackStatus) {
+        this.detailedStackStatus = detailedStackStatus;
+    }
+
+    public String getStatusType() {
+        return statusType;
+    }
+
+    public void setStatusType(String statusType) {
+        this.statusType = statusType;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakEvent{");
@@ -252,12 +274,19 @@ public class CloudbreakEvent implements ProvisionEntity {
         sb.append(", account='").append(account).append('\'');
         sb.append(", cloud='").append(cloud).append('\'');
         sb.append(", region='").append(region).append('\'');
+        sb.append(", availabilityZone='").append(availabilityZone).append('\'');
         sb.append(", blueprintName='").append(blueprintName).append('\'');
+        sb.append(", blueprintId=").append(blueprintId);
+        sb.append(", stackId=").append(stackId);
+        sb.append(", stackName='").append(stackName).append('\'');
+        sb.append(", clusterId=").append(clusterId);
+        sb.append(", clusterName='").append(clusterName).append('\'');
         sb.append(", instanceGroup='").append(instanceGroup).append('\'');
-        sb.append(", blueprintId=").append(blueprintId).append('\'');
-        sb.append(", stackId=").append(stackId).append('\'');
-        sb.append(", clusterId=").append(clusterId).append('\'');
-        sb.append(", clusterName=").append(clusterName);
+        sb.append(", stackStatus=").append(stackStatus);
+        sb.append(", statusType='").append(statusType).append('\'');
+        sb.append(", detailedStackStatus=").append(detailedStackStatus);
+        sb.append(", nodeCount=").append(nodeCount);
+        sb.append(", clusterStatus=").append(clusterStatus);
         sb.append('}');
         return sb.toString();
     }

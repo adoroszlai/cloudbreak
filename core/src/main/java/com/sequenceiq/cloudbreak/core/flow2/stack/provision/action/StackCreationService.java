@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
@@ -72,6 +74,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
+@Transactional
 public class StackCreationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationService.class);
 
@@ -123,11 +126,20 @@ public class StackCreationService {
     @Inject
     private UsageService usageService;
 
+    public void setupProvision(Stack stack) {
+        flowMessageService.fireStackEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name(), "STACK", DetailedStackStatus.PROVISION_SETUP);
+    }
+
+    public void prepareImage(Stack stack) {
+        flowMessageService.fireStackEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name(), "STACK", DetailedStackStatus.IMAGE_SETUP);
+    }
+
     public void startProvisioning(StackContext context) {
         Stack stack = context.getStack();
         MDCBuilder.buildMdcContext(stack);
-        stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, "Creating infrastructure");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name());
+        stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, DetailedStackStatus.CREATING_INFRASTRUCTURE, "Creating infrastructure");
+        flowMessageService.fireStackEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name(), "STACK",
+                DetailedStackStatus.CREATING_INFRASTRUCTURE);
         instanceMetadataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
     }
 
@@ -137,7 +149,10 @@ public class StackCreationService {
         validateResourceResults(context.getCloudContext(), result);
         List<CloudResourceStatus> results = result.getResults();
         updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results, true);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
+        flowMessageService.fireStackEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), "STACK",
+                DetailedStackStatus.INFRASTRUCTURECREATION_FINISHED, calculateStackCreationTime(startDate));
+        flowMessageService.fireStackEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), "STACK",
+                DetailedStackStatus.METADATA_COLLECTION);
         return stackService.getById(stack.getId());
     }
 
@@ -174,7 +189,10 @@ public class StackCreationService {
     public Stack setupMetadata(StackContext context, CollectMetadataResult collectMetadataResult) {
         Stack stack = context.getStack();
         metadatSetupService.saveInstanceMetaData(stack, collectMetadataResult.getResults(), InstanceStatus.CREATED);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireStackEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, UPDATE_IN_PROGRESS.name(), "STACK",
+                DetailedStackStatus.METADATA_COLLECTION_FINISHED);
+        flowMessageService.fireStackEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, UPDATE_IN_PROGRESS.name(), "STACK",
+                DetailedStackStatus.TLS_SETUP);
         LOGGER.debug("Metadata setup DONE.");
         return stackService.getById(stack.getId());
     }
@@ -202,8 +220,10 @@ public class StackCreationService {
     }
 
     public void stackCreationFinished(Stack stack) {
+        flowMessageService.fireStackEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, UPDATE_IN_PROGRESS.name(), "STACK",
+                DetailedStackStatus.TLS_SETUP_FINISHED);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED_BILLING, BillingStatus.BILLING_STARTED.name());
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED, AVAILABLE.name());
+        flowMessageService.fireStackEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED, AVAILABLE.name(), "STACK", DetailedStackStatus.PROVISIONED);
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         usageService.openUsagesForStack(stack);
     }

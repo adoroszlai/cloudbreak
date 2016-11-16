@@ -31,6 +31,8 @@ public class NotificationAssemblingService {
         notification.setClusterStatus(cloudbreakEvent.getClusterStatus());
         notification.setClusterId(cloudbreakEvent.getClusterId());
         notification.setClusterName(cloudbreakEvent.getClusterName());
+        notification.setStatusType(cloudbreakEvent.getStatusType());
+        notification.setDetailedStackStatus(cloudbreakEvent.getDetailedStackStatus());
         return notification;
     }
 

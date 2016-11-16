@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.notification;
 
 import java.util.Date;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 
 public class Notification {
@@ -39,6 +40,10 @@ public class Notification {
     private String instanceGroup;
 
     private Status clusterStatus;
+
+    private String statusType;
+
+    private DetailedStackStatus detailedStackStatus;
 
     public Notification() {
     }
@@ -177,5 +182,21 @@ public class Notification {
 
     public void setClusterStatus(Status clusterStatus) {
         this.clusterStatus = clusterStatus;
+    }
+
+    public String getStatusType() {
+        return statusType;
+    }
+
+    public void setStatusType(String statusType) {
+        this.statusType = statusType;
+    }
+
+    public DetailedStackStatus getDetailedStackStatus() {
+        return detailedStackStatus;
+    }
+
+    public void setDetailedStackStatus(DetailedStackStatus detailedStackStatus) {
+        this.detailedStackStatus = detailedStackStatus;
     }
 }

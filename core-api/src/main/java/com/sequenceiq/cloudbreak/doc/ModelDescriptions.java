@@ -98,6 +98,8 @@ public class ModelDescriptions {
         public static final String FILE_SYSTEM = "external file system configuration";
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instnce group adjustment";
+        public static final String STATUS_TYPE = "type of the status";
+        public static final String DETAILED_STACK_STATUS = "detailed stack status";
     }
 
     public static class ClusterModelDescription {

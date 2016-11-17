@@ -17,7 +17,7 @@ public abstract class SecurityRuleBase implements JsonEntity {
     private String subnet;
 
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.PORTS, required = true)
-    @Pattern(regexp = "^[0-9]+(,[0-9]+)*$",
+    @Pattern(regexp = "^[0-9|-]+(,[0-9|-]+)*$",
             message = "The ports field should contain a comma separated list of port numbers, for example: 8080,9090,5555")
     private String ports;
 

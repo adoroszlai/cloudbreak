@@ -35,18 +35,16 @@ import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<ClusterCreationState, ClusterCreationEvent> {
     private static final List<Transition<ClusterCreationState, ClusterCreationEvent>> TRANSITIONS =
             new Transition.Builder<ClusterCreationState, ClusterCreationEvent>().defaultFailureEvent(CLUSTER_CREATION_FAILED_EVENT)
-            .from(INIT_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(CLUSTER_CREATION_EVENT).noFailureEvent()
             .from(INIT_STATE).to(STARTING_AMBARI_STATE).event(CLUSTER_INSTALL_EVENT).noFailureEvent()
-            .from(BOOTSTRAPPING_MACHINES_STATE).to(COLLECTING_HOST_METADATA_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
-                    .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
-            .from(COLLECTING_HOST_METADATA_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
+            .from(INIT_STATE).to(COLLECTING_HOST_METADATA_STATE).event(CLUSTER_CREATION_EVENT).noFailureEvent()
+            .from(COLLECTING_HOST_METADATA_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
+            .from(BOOTSTRAPPING_MACHINES_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
+                    .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
             .from(STARTING_AMBARI_SERVICES_STATE).to(STARTING_AMBARI_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
-            .from(STARTING_AMBARI_STATE).to(INSTALLING_CLUSTER_STATE).event(START_AMBARI_FINISHED_EVENT)
-                    .failureEvent(START_AMBARI_FAILED_EVENT)
-            .from(INSTALLING_CLUSTER_STATE).to(CLUSTER_CREATION_FINISHED_STATE).event(INSTALL_CLUSTER_FINISHED_EVENT)
-                    .failureEvent(INSTALL_CLUSTER_FAILED_EVENT)
+            .from(STARTING_AMBARI_STATE).to(INSTALLING_CLUSTER_STATE).event(START_AMBARI_FINISHED_EVENT).failureEvent(START_AMBARI_FAILED_EVENT)
+            .from(INSTALLING_CLUSTER_STATE).to(CLUSTER_CREATION_FINISHED_STATE).event(INSTALL_CLUSTER_FINISHED_EVENT).failureEvent(INSTALL_CLUSTER_FAILED_EVENT)
             .from(CLUSTER_CREATION_FINISHED_STATE).to(FINAL_STATE).event(CLUSTER_CREATION_FINISHED_EVENT).defaultFailureEvent()
             .build();
 

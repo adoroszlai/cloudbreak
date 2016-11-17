@@ -33,27 +33,11 @@ public class ClusterCreationActions {
     @Inject
     private ClusterCreationService clusterCreationService;
 
-    @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
-    public Action bootstrappingMachinesAction() {
+    @Bean(name = "COLLECTING_HOST_METADATA_STATE")
+    public Action collectingHostMetadataAction() {
         return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterCreationService.bootstrappingMachines(context.getStack());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new BootstrapMachinesRequest(context.getStack().getId());
-            }
-        };
-    }
-
-    @Bean(name = "COLLECTING_HOST_METADATA_STATE")
-    public Action collectingHostMetadataAction() {
-        return new AbstractStackCreationAction<BootstrapMachinesSuccess>(BootstrapMachinesSuccess.class) {
-            @Override
-            protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.collectingHostMetadata(context.getStack());
                 sendEvent(context);
             }
@@ -65,11 +49,27 @@ public class ClusterCreationActions {
         };
     }
 
+    @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
+    public Action bootstrappingMachinesAction() {
+        return new AbstractStackCreationAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
+                clusterCreationService.bootstrappingMachines(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new BootstrapMachinesRequest(context.getStack().getId());
+            }
+        };
+    }
+
     @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
     public Action startingAmbariServicesAction() {
-        return new AbstractClusterAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
+        return new AbstractClusterAction<BootstrapMachinesSuccess>(BootstrapMachinesSuccess.class) {
             @Override
-            protected void doExecute(ClusterContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingAmbariServices(context.getStack(), context.getCluster());
                 sendEvent(context);
             }

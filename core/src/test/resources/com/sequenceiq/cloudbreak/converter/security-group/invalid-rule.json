@@ -1,6 +1,6 @@
 {
   "subnet" : "0.0.0.0/0",
-  "ports" : "80,22,443",
+  "ports" : "22,443,70000",
   "protocol" : "tcp",
   "modifiable" : true
 }

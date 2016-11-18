@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 public class JsonToSecurityRuleConverterTest extends AbstractJsonConverterTest<SecurityRuleRequest> {
@@ -24,6 +25,11 @@ public class JsonToSecurityRuleConverterTest extends AbstractJsonConverterTest<S
         SecurityRule result = underTest.convert(getRequest("security-group/security-rule.json"));
         // THEN
         assertAllFieldsNotNull(result, Collections.singletonList("securityGroup"));
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testInvalidPorts() {
+        underTest.convert(getRequest("security-group/invalid-rule.json"));
     }
 
     @Override
